@@ -3,6 +3,7 @@ import cv2
 import random
 import os
 
+card_size=50
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, filename, x, y):
@@ -11,8 +12,11 @@ class Tile(pygame.sprite.Sprite):
         self.name = filename.split('.')[0]
 
         self.original_image = pygame.image.load('images/aliens/' + filename)
+        self.original_image=pygame.transform.scale(self.original_image, (card_size, card_size))
 
         self.back_image = pygame.image.load('images/aliens/' + filename)
+        self.back_image = pygame.transform.scale(self.back_image, (card_size, card_size))
+
         pygame.draw.rect(self.back_image, WHITE, self.back_image.get_rect())
 
         self.image = self.back_image
@@ -31,8 +35,6 @@ class Tile(pygame.sprite.Sprite):
 
 class Game:
     def __init__(self):
-        self.img = None
-        self.success = None
         self.level = 1
         self.level_complete = False
 
@@ -57,9 +59,12 @@ class Game:
         self.generate_level(self.level)
 
         # initialize video
+
         self.is_video_playing = True
         self.play = pygame.image.load('images/play.png').convert_alpha()
+        self.play = pygame.transform.scale(self.play, (50, 50))
         self.stop = pygame.image.load('images/stop.png').convert_alpha()
+        self.stop = pygame.transform.scale(self.stop, (50, 50))
         self.video_toggle = self.play
         self.video_toggle_rect = self.video_toggle.get_rect(topright=(WINDOW_WIDTH - 50, 10))
         self.get_video()
@@ -67,28 +72,31 @@ class Game:
         # initialize music
         self.is_music_playing = True
         self.sound_on = pygame.image.load('images/speaker.png').convert_alpha()
+        self.sound_on = pygame.transform.scale(self.sound_on, (50, 50))
         self.sound_off = pygame.image.load('images/mute.png').convert_alpha()
+        self.sound_off = pygame.transform.scale(self.sound_off, (50, 50))
         self.music_toggle = self.sound_on
         self.music_toggle_rect = self.music_toggle.get_rect(topright=(WINDOW_WIDTH - 10, 10))
 
         # load music
-        pygame.mixer.music.load('sounds/bg-music.mp3')
+        pygame.mixer.music.load('sound/music.mp3')
         pygame.mixer.music.set_volume(.3)
         pygame.mixer.music.play()
 
-    def update(self, event_datas):
+    def update(self, event_list):
         if self.is_video_playing:
             self.success, self.img = self.cap.read()
 
-        self.user_input(event_datas)
+        self.user_input(event_list)
         self.draw()
-        self.check_level_complete(event_datas)
+        self.check_level_complete(event_list)
 
-    def check_level_complete(self, event_datas):
+    def check_level_complete(self, event_list):
         if not self.block_game:
-            for event in event_datas:
+            for event in event_list:
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     for tile in self.tiles_group:
+                        print(self.level_complete)
                         if tile.rect.collidepoint(event.pos):
                             self.flipped.append(tile.name)
                             tile.show()
@@ -125,7 +133,6 @@ class Game:
         self.cols = self.rows = self.cols if self.cols >= self.rows else self.rows
 
         TILES_WIDTH = (self.img_width * self.cols + self.padding * 3)
-        LEFT_MARING: int
         LEFT_MARING = RIGHT_MARGIN = (self.width - TILES_WIDTH) // 2
         # tiles = []
         self.tiles_group.empty()
@@ -216,7 +223,7 @@ class Game:
             screen.blit(next_text, next_rect)
 
     def get_video(self):
-        self.cap = cv2.VideoCapture('video/earth.mp4')
+        self.cap = cv2.VideoCapture('video/space.mp4')
         self.success, self.img = self.cap.read()
         self.shape = self.img.shape[1::-1]
 
