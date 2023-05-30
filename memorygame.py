@@ -146,9 +146,8 @@ class Game:
         for i in range(len(aliens)):
             x = LEFT_MARING + ((self.img_width + self.padding) * (i % self.cols))
             y = self.margin_top + (i // self.rows * (self.img_height + self.padding))
-            Tile(aliens[i], x, y)
-            for tile in self.tiles_group:
-                self.tiles_group.add(tile)
+            tile = Tile(aliens[i], x, y)
+            self.tiles_group.add(tile)
 
     def select_random_aliens(self):
         aliens = random.sample(self.all_aliens, (self.level + self.level + 2))
