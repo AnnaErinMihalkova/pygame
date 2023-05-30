@@ -3,7 +3,8 @@ import cv2
 import random
 import os
 
-card_size=50
+card_size = 50
+
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, filename, x, y):
@@ -12,7 +13,7 @@ class Tile(pygame.sprite.Sprite):
         self.name = filename.split('.')[0]
 
         self.original_image = pygame.image.load('images/aliens/' + filename)
-        self.original_image=pygame.transform.scale(self.original_image, (card_size, card_size))
+        self.original_image = pygame.transform.scale(self.original_image, (card_size, card_size))
 
         self.back_image = pygame.image.load('images/aliens/' + filename)
         self.back_image = pygame.transform.scale(self.back_image, (card_size, card_size))
@@ -35,6 +36,11 @@ class Tile(pygame.sprite.Sprite):
 
 class Game:
     def __init__(self):
+        self.shape = None
+        self.cap = None
+        self.aliens = None
+        self.img = None
+        self.success = None
         self.level = 1
         self.level_complete = False
 
@@ -56,7 +62,7 @@ class Game:
         self.block_game = False
 
         # generate first level
-        self.generate_level(self.level)
+        self.generate_level()
 
         # initialize video
 
@@ -83,21 +89,20 @@ class Game:
         pygame.mixer.music.set_volume(.3)
         pygame.mixer.music.play()
 
-    def update(self, event_list):
+    def update(self, list_for_events):
         if self.is_video_playing:
             self.success, self.img = self.cap.read()
 
-        self.user_input(event_list)
+        self.user_input(list_for_events)
         self.draw()
-        self.check_level_complete(event_list)
+        self.check_level_complete(list_for_events)
 
-    def check_level_complete(self, event_list):
+    def check_level_complete(self, events1_list):
         if not self.block_game:
-            for event in event_list:
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            for event1 in events1_list:
+                if event1.type == pygame.MOUSEBUTTONDOWN and event1.button == 1:
                     for tile in self.tiles_group:
-                        print(self.level_complete)
-                        if tile.rect.collidepoint(event.pos):
+                        if tile.rect.collidepoint(event1.pos):
                             self.flipped.append(tile.name)
                             tile.show()
                             if len(self.flipped) == 2:
@@ -122,8 +127,8 @@ class Game:
                         tile.hide()
                 self.flipped = []
 
-    def generate_level(self, level):
-        self.aliens = self.select_random_aliens(self.level)
+    def generate_level(self):
+        self.aliens = self.select_random_aliens()
         self.level_complete = False
         self.rows = self.level + 1
         self.cols = 4
@@ -133,7 +138,7 @@ class Game:
         self.cols = self.rows = self.cols if self.cols >= self.rows else self.rows
 
         TILES_WIDTH = (self.img_width * self.cols + self.padding * 3)
-        LEFT_MARING = RIGHT_MARGIN = (self.width - TILES_WIDTH) // 2
+        LEFT_MARING = (self.width - TILES_WIDTH) // 2
         # tiles = []
         self.tiles_group.empty()
 
@@ -143,16 +148,16 @@ class Game:
             tile = Tile(aliens[i], x, y)
             self.tiles_group.add(tile)
 
-    def select_random_aliens(self, level):
+    def select_random_aliens(self):
         aliens = random.sample(self.all_aliens, (self.level + self.level + 2))
         aliens_copy = aliens.copy()
         aliens.extend(aliens_copy)
         random.shuffle(aliens)
         return aliens
 
-    def user_input(self, event_list):
-        for event in event_list:
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+    def user_input(self, events2_list):
+        for event2 in events2_list:
+            if event2.type == pygame.MOUSEBUTTONDOWN and event2.button == 1:
                 if self.music_toggle_rect.collidepoint(pygame.mouse.get_pos()):
                     if self.is_music_playing:
                         self.is_music_playing = False
@@ -170,12 +175,12 @@ class Game:
                         self.is_video_playing = True
                         self.video_toggle = self.play
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and self.level_complete:
+            if event2.type == pygame.KEYDOWN:
+                if event2.key == pygame.K_SPACE and self.level_complete:
                     self.level += 1
                     if self.level >= 6:
                         self.level = 1
-                    self.generate_level(self.level)
+                    self.generate_level()
 
     def draw(self):
         screen.fill(BLACK)
@@ -246,12 +251,12 @@ game = Game()
 
 running = True
 while running:
-    event_list = pygame.event.get()
-    for event in event_list:
+    events_list = pygame.event.get()
+    for event in events_list:
         if event.type == pygame.QUIT:
             running = False
 
-    game.update(event_list)
+    game.update(events_list)
 
     pygame.display.update()
     clock.tick(FPS)
