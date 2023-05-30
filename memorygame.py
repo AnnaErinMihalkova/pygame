@@ -102,7 +102,7 @@ class Game:
             for event1 in events1_list:
                 if event1.type == pygame.MOUSEBUTTONDOWN and event1.button == 1:
                     for tile in self.tiles_group:
-                        if tile.rect.collidepoint(event1.pos):
+                        if tile.rect.collidepoint(event.pos):
                             self.flipped.append(tile.name)
                             tile.show()
                             if len(self.flipped) == 2:
@@ -110,12 +110,13 @@ class Game:
                                     self.block_game = True
                                 else:
                                     self.flipped = []
-                                    for tile in self.tiles_group:
-                                        if tile.shown:
+                                    for inner_tile in self.tiles_group:
+                                        if inner_tile.shown:
                                             self.level_complete = True
                                         else:
                                             self.level_complete = False
                                             break
+
         else:
             self.frame_count += 1
             if self.frame_count == FPS:
@@ -145,8 +146,9 @@ class Game:
         for i in range(len(aliens)):
             x = LEFT_MARING + ((self.img_width + self.padding) * (i % self.cols))
             y = self.margin_top + (i // self.rows * (self.img_height + self.padding))
-            tile = Tile(aliens[i], x, y)
-            self.tiles_group.add(tile)
+            Tile(aliens[i], x, y)
+            for tile in self.tiles_group:
+                self.tiles_group.add(tile)
 
     def select_random_aliens(self):
         aliens = random.sample(self.all_aliens, (self.level + self.level + 2))
